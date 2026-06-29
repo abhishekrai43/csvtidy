@@ -1,0 +1,22 @@
+# csvtidy recipe — clean and merge monthly exports into one tidy file.
+#
+# Run it from the repo root with:
+#   csvtidy run examples/recipe.yaml
+#
+# Build the steps once here, then re-run on next month's exports unchanged.
+
+input: examples/data/exports/*.csv   # files, a folder, or a glob
+output: customers.clean.csv          # override with: csvtidy run ... -o other.csv
+source_column: source_file           # tag each row with the file it came from
+
+steps:
+  - clean:
+      trim: true                     # strip leading/trailing whitespace
+      drop_empty_rows: true          # remove all-blank rows
+      collapse_spaces: true          # squeeze internal whitespace runs
+      fix_dates: [signup_date]       # normalize mixed date formats
+      date_format: "%Y-%m-%d"        # ...to ISO YYYY-MM-DD
+
+  - dedupe:
+      subset: [email]                # one row per email address
+      keep: first                    # keep the earliest occurrence
