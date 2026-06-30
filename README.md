@@ -9,7 +9,7 @@ For data engineers, analysts, and anyone wrangling CSV/Excel exports that are to
 ![Powered by DuckDB](https://img.shields.io/badge/engine-DuckDB-yellow.svg)
 
 ```bash
-pipx install csvtidy
+pip install csvtidy
 ```
 
 ```bash
