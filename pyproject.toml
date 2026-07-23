@@ -51,7 +51,8 @@ dev = ["pytest>=7.0"]
 csvtidy = "csvtidy.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/abhishekrai43/csvtidy"
+Homepage = "https://abhishekrai43.github.io/csvtidy/"
+Documentation = "https://abhishekrai43.github.io/csvtidy/"
 Repository = "https://github.com/abhishekrai43/csvtidy"
 Issues = "https://github.com/abhishekrai43/csvtidy/issues"
 

@@ -8,6 +8,8 @@ For data engineers, analysts, and anyone wrangling CSV exports — including the
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)
 ![Powered by DuckDB](https://img.shields.io/badge/engine-DuckDB-yellow.svg)
 
+**Docs:** [abhishekrai43.github.io/csvtidy](https://abhishekrai43.github.io/csvtidy/) · guide: [merging CSV files from the command line](https://abhishekrai43.github.io/csvtidy/merge-csv-files-command-line.html)
+
 ```bash
 pip install csvtidy
 ```
