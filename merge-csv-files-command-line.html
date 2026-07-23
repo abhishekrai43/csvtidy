@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge CSV Files from the Command Line — copy, PowerShell, csvtidy</title>
+<meta name="description" content="Three ways to combine CSV files from the command line — Windows copy, PowerShell, and csvtidy — honestly compared, with the repeated-header catches of each.">
+<link rel="canonical" href="https://abhishekrai43.github.io/csvtidy/merge-csv-files-command-line.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Merge CSV Files from the Command Line — copy, PowerShell, csvtidy">
+<meta property="og:description" content="Windows copy, PowerShell, and csvtidy compared honestly — including the repeated-header and encoding traps.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Merge CSV Files from the Command Line: copy, PowerShell, and csvtidy Compared","publisher":{"@type":"Organization","name":"csvtidy"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"How do I combine all CSV files in a folder into one with CMD?","acceptedAnswer":{"@type":"Answer","text":"cd into the folder and run: copy *.csv combined.csv. It concatenates every CSV byte-for-byte. The catch: every file's header row is repeated in the middle of your data, encodings are mixed blindly, and files that don't share identical columns are scrambled — nothing is aligned."}},
+ {"@type":"Question","name":"Why does my merged CSV have header rows in the middle of the data?","acceptedAnswer":{"@type":"Answer","text":"Because copy and type concatenate files literally — each file's first line (its header) becomes an ordinary data row in the combined file. You have to strip repeated headers yourself, or use a tool that understands CSV structure, like PowerShell's Import-Csv or csvtidy."}},
+ {"@type":"Question","name":"What if my CSV files have different or reordered columns?","acceptedAnswer":{"@type":"Answer","text":"Byte concatenation (copy) silently misaligns them. PowerShell's Import-Csv takes the first file's columns as the shape and drops columns that appear only in later files. csvtidy aligns columns by name across all files: missing cells become empty, and no data shifts into the wrong column."}},
+ {"@type":"Question","name":"Can I merge CSV files bigger than my RAM from the command line?","acceptedAnswer":{"@type":"Answer","text":"copy handles big files (it never parses them) but produces a structurally broken merge. PowerShell's Import-Csv loads rows into memory as objects and gets very slow on large files. csvtidy uses DuckDB's streaming engine, which spills to disk, so folders of multi-gigabyte CSVs merge on an ordinary laptop."}}
+]}
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-head"><div class="wrap">
+  <a class="brand" style="color:var(--cmd)" href="index.html">csvtidy</a>
+  <nav>
+    <a href="index.html">docs</a>
+    <a href="https://github.com/abhishekrai43/csvtidy">GitHub</a>
+    <a href="https://pypi.org/project/csvtidy/">PyPI</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+<div class="hero">
+  <h1><span class="p">$</span> merge CSV files from<br>the command line</h1>
+  <p class="sub">Three ways to combine a folder of CSVs into one file — plain Windows
+  <b>copy</b>, <b>PowerShell</b>, and <b>csvtidy</b> — with the catches of each,
+  honestly. All three run entirely on your machine.</p>
+</div>
+
+<section id="copy">
+  <h2>copy *.csv combined.csv <span class="f"># the classic</span></h2>
+  <p>The one-liner everyone finds first. In CMD, from inside the folder:</p>
+  <div class="term">
+    <div class="ln cmd">cd C:\exports</div>
+    <div class="ln cmd">copy *.csv combined.csv</div>
+  </div>
+  <p>(Same idea with <code>type *.csv &gt; combined.csv</code>, or on Linux/macOS
+  <code>cat *.csv &gt; combined.csv</code>.) It concatenates the files byte-for-byte —
+  which is exactly its problem. <b>Three catches:</b></p>
+  <ul>
+    <li><b>Repeated headers.</b> Every file's header line lands in the middle of your data as an
+    ordinary row. Ten files = nine junk rows you must hunt down.</li>
+    <li><b>No column alignment.</b> If one file has an extra column, or columns in a different
+    order, values silently shift into the wrong columns. Nothing warns you.</li>
+    <li><b>Mixed encodings and stray bytes.</b> UTF-8 BOMs and different encodings are glued
+    together blindly; the combined file can open as mojibake.</li>
+  </ul>
+  <p><b>When it's fine:</b> identical, header-less exports from the same system, quick and dirty.
+  It never parses anything, so it's fast at any size — just structurally blind.</p>
+</section>
+
+<section id="powershell">
+  <h2>PowerShell <span class="f"># Import-Csv | Export-Csv</span></h2>
+  <div class="term">
+    <div class="ln cmd">Get-ChildItem <span class="pth">*.csv</span> | ForEach-Object { Import-Csv $_ } | Export-Csv combined.csv <span class="f">-NoTypeInformation</span></div>
+  </div>
+  <p>A real improvement: PowerShell parses the CSVs, so headers are handled correctly — one
+  header in the output, none in the middle. <b>Remaining catches:</b></p>
+  <ul>
+    <li><b>First file wins.</b> The output's columns come from the first file; columns that only
+    appear in later files are dropped without an error.</li>
+    <li><b>Memory and speed.</b> Every row becomes a .NET object. On hundreds of thousands of
+    rows this gets slow; on multi-gigabyte files, impractical.</li>
+    <li><b>No cleanup.</b> Duplicates, mixed date formats, and stray whitespace pass straight
+    through — that's a second script.</li>
+  </ul>
+</section>
+
+<section id="csvtidy">
+  <h2>csvtidy merge <span class="f"># built for exactly this</span></h2>
+  <div class="term">
+    <div class="ln cmd">pip install csvtidy</div>
+    <div class="ln cmd">csvtidy merge <span class="pth">C:\exports</span> <span class="f">--output</span> combined.csv <span class="f">--source-column</span> file</div>
+  </div>
+  <p>One command, structure-aware:</p>
+  <ul>
+    <li><b>Headers handled</b> — read as headers, never repeated as data.</li>
+    <li><b>Columns aligned by name</b> across files — extra or reordered columns don't shift
+    data; missing cells become empty.</li>
+    <li><b>Bigger than RAM</b> — DuckDB streams and spills to disk, so folders of multi-gigabyte
+    exports merge on a laptop.</li>
+    <li><b>Cleanup in the same pass</b> — chain dedupe and date fixes, or save the whole thing
+    as a <a href="index.html#run">recipe</a> and re-run it on next month's folder:</li>
+  </ul>
+  <div class="term">
+    <div class="ln cmd">csvtidy merge <span class="pth">./exports</span> | csvtidy dedupe - <span class="f">--subset</span> email &gt; clean.csv</div>
+  </div>
+  <p>Free, MIT-licensed, offline: <a href="https://github.com/abhishekrai43/csvtidy">source on GitHub</a>.</p>
+</section>
+
+<section id="verdict">
+  <h2>which one <span class="f">--when</span></h2>
+  <div class="scroll-x"><table>
+    <tr><th></th><th>copy / cat</th><th>PowerShell</th><th>csvtidy</th></tr>
+    <tr><td style="color:var(--text)">Headers deduplicated</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td style="color:var(--text)">Columns aligned by name</td><td>No</td><td>First file wins</td><td>Yes</td></tr>
+    <tr><td style="color:var(--text)">Files bigger than RAM</td><td>Yes (blind)</td><td>Impractical</td><td>Yes (streamed)</td></tr>
+    <tr><td style="color:var(--text)">Dedupe / date fixes</td><td>No</td><td>Scripted by hand</td><td>Built in</td></tr>
+    <tr><td style="color:var(--text)">Install needed</td><td>None</td><td>None (Windows)</td><td>pip install</td></tr>
+  </table></div>
+</section>
+
+<section id="faq">
+  <h2>FAQ</h2>
+  <p><b>How do I combine all CSV files in a folder with CMD?</b> <code>cd</code> into the folder,
+  then <code>copy *.csv combined.csv</code> — accepting the repeated-header and column-alignment
+  catches above.</p>
+  <p><b>Why does my merged CSV have headers in the middle of the data?</b> Because
+  <code>copy</code>/<code>type</code>/<code>cat</code> concatenate literally — each file's header
+  line becomes a data row. Use a CSV-aware tool (PowerShell or csvtidy) to avoid it.</p>
+  <p><b>What if my files have different or reordered columns?</b> <code>copy</code> misaligns
+  silently; PowerShell drops later-file-only columns; csvtidy aligns by name and leaves missing
+  cells empty.</p>
+  <p><b>Can I merge files bigger than RAM?</b> With <code>copy</code>, yes but blindly; with
+  PowerShell, not realistically; with csvtidy, yes — DuckDB streams and spills to disk.</p>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="index.html">csvtidy docs</a>
+    <a href="https://github.com/abhishekrai43/csvtidy">GitHub</a>
+    <a href="https://pypi.org/project/csvtidy/">PyPI</a>
+  </div>
+  <p>Prefer a desktop app to a terminal? The same offline, recipe-based idea with a visual
+  builder and live preview: <a href="https://kramata.com/blog/merge-multiple-csv-files-into-one">merging CSV files with Kramata</a>.</p>
+</div></footer>
+</body>
+</html>

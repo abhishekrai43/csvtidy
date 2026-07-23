@@ -1,0 +1,83 @@
+/* csvtidy docs — terminal-session aesthetic. Dark by design (it's a CLI). */
+:root{
+  --bg:#101418; --bg-panel:#161b22; --bg-code:#0b0e13;
+  --line:#242b35; --text:#d5dbe3; --text-dim:#8b949e; --text-faint:#5c6570;
+  --prompt:#4cc38a;   /* $ prompt / success */
+  --flag:#d9a53f;     /* flags & options */
+  --path:#6cb6ff;     /* paths, links */
+  --cmd:#e6edf3;      /* the command itself */
+  --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,"Liberation Mono",monospace;
+  --sans:system-ui,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6}
+a{color:var(--path);text-decoration:none}
+a:hover{text-decoration:underline}
+a:focus-visible,button:focus-visible{outline:2px solid var(--prompt);outline-offset:2px}
+.wrap{max-width:840px;margin:0 auto;padding:0 20px}
+
+/* Header */
+.site-head{border-bottom:1px solid var(--line);padding:14px 0;position:sticky;top:0;background:rgba(16,20,24,.94);backdrop-filter:blur(6px);z-index:10}
+.site-head .wrap{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.brand{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--cmd)}
+.brand::before{content:"$ ";color:var(--prompt)}
+.site-head nav{display:flex;gap:16px;margin-left:auto;font-size:14px}
+.site-head nav a{color:var(--text-dim)}
+.site-head nav a:hover{color:var(--text)}
+
+/* Hero */
+.hero{padding:64px 0 40px}
+.hero h1{font-family:var(--mono);font-size:clamp(24px,4.5vw,34px);line-height:1.25;margin:0 0 14px;font-weight:600;letter-spacing:-.5px}
+.hero h1 .p{color:var(--prompt)}
+.hero .sub{color:var(--text-dim);max-width:640px;font-size:17px;margin:0 0 26px}
+.hero .sub b{color:var(--text);font-weight:600}
+
+/* Terminal blocks: session = the interface of the docs */
+.term{background:var(--bg-code);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.7;margin:14px 0}
+.term .ln{white-space:pre}
+.term .ln.cmd::before{content:"$ ";color:var(--prompt);user-select:none}
+.term .ln.cmd{color:var(--cmd)}
+.term .ln.out{color:var(--text-dim)}
+.term .ln.cmt{color:var(--text-faint)}
+.term .ln.cmt::before{content:"# ";color:var(--text-faint)}
+.term .f{color:var(--flag)}
+.term .pth{color:var(--path)}
+code{font-family:var(--mono);font-size:.92em;background:var(--bg-panel);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.term code{background:none;border:none;padding:0}
+
+/* Sections: headings are prompt lines — the TOC mirrors the CLI itself */
+section{padding:26px 0;border-top:1px solid var(--line)}
+h2{font-family:var(--mono);font-size:19px;font-weight:600;margin:8px 0 12px;color:var(--cmd)}
+h2::before{content:"$ ";color:var(--prompt)}
+h2 .f{color:var(--flag);font-weight:500}
+h3{font-family:var(--mono);font-size:15px;color:var(--text);margin:22px 0 8px}
+p,li{color:var(--text-dim);font-size:15.5px}
+p b,li b{color:var(--text);font-weight:600}
+ul,ol{padding-left:22px}
+
+/* Option tables */
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+th{background:var(--bg-panel);color:var(--text);font-family:var(--mono);font-weight:600;font-size:13px}
+td:first-child{font-family:var(--mono);color:var(--flag);white-space:nowrap;font-size:13px}
+td{color:var(--text-dim)}
+.scroll-x{overflow-x:auto}
+
+/* Install strip */
+.install{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 6px}
+.install .term{margin:0;flex:1;min-width:260px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 0}
+.badge{font-family:var(--mono);font-size:12px;color:var(--text-dim);border:1px solid var(--line);border-radius:20px;padding:3px 11px}
+.badge b{color:var(--prompt);font-weight:600}
+
+/* Footer */
+footer{border-top:1px solid var(--line);margin-top:40px;padding:26px 0 40px;font-size:14px;color:var(--text-faint)}
+footer .links{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+footer .links a{color:var(--text-dim)}
+
+@media(max-width:600px){
+  .hero{padding:44px 0 30px}
+  .term{font-size:12.5px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

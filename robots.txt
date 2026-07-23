@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://abhishekrai43.github.io/csvtidy/sitemap.xml

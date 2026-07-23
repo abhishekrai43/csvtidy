@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>csvtidy — merge &amp; clean CSV files from the command line</title>
+<meta name="description" content="Free, open-source CLI to merge and clean CSV files — combine a folder into one, dedupe, fix dates. Offline, DuckDB-powered, streams files bigger than RAM.">
+<link rel="canonical" href="https://abhishekrai43.github.io/csvtidy/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="csvtidy — merge &amp; clean CSV files from the command line">
+<meta property="og:description" content="Free, open-source CLI: combine a folder of CSVs into one file, dedupe, fix dates. Offline, DuckDB-powered, handles files bigger than RAM.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"csvtidy","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux","description":"Command-line tool to merge and clean CSV files: combine a folder into one file, remove duplicates, standardize dates. Offline, DuckDB-powered, streams files bigger than RAM.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/license/mit","url":"https://abhishekrai43.github.io/csvtidy/","downloadUrl":"https://pypi.org/project/csvtidy/","softwareRequirements":"Python 3.9+"}
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="site-head"><div class="wrap">
+  <span class="brand">csvtidy</span>
+  <nav>
+    <a href="#merge">merge</a>
+    <a href="#dedupe">dedupe</a>
+    <a href="#clean">clean</a>
+    <a href="#run">recipes</a>
+    <a href="merge-csv-files-command-line.html">guide</a>
+    <a href="https://github.com/abhishekrai43/csvtidy">GitHub</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+<div class="hero">
+  <h1><span class="p">$</span> merge and clean CSV files<br>from the command line</h1>
+  <p class="sub">Combine an entire folder of exports into one tidy file, drop duplicates, fix
+  dates — in one command. <b>100% offline</b>, powered by DuckDB so it streams files
+  <b>bigger than RAM</b>, and driven by reusable <b>recipes</b>.</p>
+
+  <div class="install">
+    <div class="term">
+      <div class="ln cmd">pip install csvtidy</div>
+      <div class="ln cmd">csvtidy merge <span class="pth">./exports</span> <span class="f">--output</span> combined.csv</div>
+    </div>
+  </div>
+  <div class="badges">
+    <span class="badge">license <b>MIT</b></span>
+    <span class="badge">python <b>3.9+</b></span>
+    <span class="badge">engine <b>DuckDB</b></span>
+    <span class="badge">cloud <b>none</b></span>
+  </div>
+</div>
+
+<section id="why">
+  <h2>csvtidy <span class="f">--help</span></h2>
+  <ul>
+    <li><b>Offline and private.</b> Your data never leaves your machine. No accounts, no uploads.</li>
+    <li><b>Handles huge files.</b> DuckDB streams and spills to disk — merge CSVs that would crash a spreadsheet.</li>
+    <li><b>Recipe-driven.</b> Save the cleanup as YAML, re-run it on next month's data with one command.</li>
+    <li><b>Non-destructive by default.</b> Values are read as text, never silently retyped; unparseable dates keep their original text.</li>
+    <li><b>Merges messy schemas.</b> Columns are aligned by name across files — reordered or missing columns don't shift data.</li>
+  </ul>
+</section>
+
+<section id="merge">
+  <h2>csvtidy merge</h2>
+  <p>Combine multiple CSVs, a folder, or globs into one file. Per-file headers are read as
+  headers (never repeated as data rows), and <code>--source-column</code> tags every row with the
+  file it came from.</p>
+  <div class="term">
+    <div class="ln cmt">merge every CSV in a folder into one file</div>
+    <div class="ln cmd">csvtidy merge <span class="pth">./exports</span> <span class="f">--output</span> combined.csv <span class="f">--source-column</span> file</div>
+  </div>
+  <div class="scroll-x"><table>
+    <tr><th>option</th><th>what it does</th></tr>
+    <tr><td>-o, --output PATH</td><td>Write to this CSV (streamed to disk). Omit to print to stdout.</td></tr>
+    <tr><td>--source-column NAME</td><td>Add a column with each row's source file name.</td></tr>
+    <tr><td>--pattern GLOB</td><td>Glob used when an input is a folder (default <code>*.csv</code>).</td></tr>
+    <tr><td>-r, --recursive</td><td>Recurse into sub-folders.</td></tr>
+  </table></div>
+  <p>Doing this by hand in CMD or PowerShell? See the honest comparison:
+  <a href="merge-csv-files-command-line.html">merging CSV files from the command line — copy, PowerShell, and csvtidy</a>.</p>
+</section>
+
+<section id="dedupe">
+  <h2>csvtidy dedupe</h2>
+  <p>Remove duplicate rows, preserving input order.</p>
+  <div class="term">
+    <div class="ln cmt">exact duplicate rows</div>
+    <div class="ln cmd">csvtidy dedupe combined.csv <span class="f">--output</span> deduped.csv</div>
+    <div class="ln cmt">rows are duplicates when one column matches; keep the first seen</div>
+    <div class="ln cmd">csvtidy dedupe combined.csv <span class="f">--subset</span> email <span class="f">--keep</span> first</div>
+  </div>
+  <div class="scroll-x"><table>
+    <tr><th>option</th><th>what it does</th></tr>
+    <tr><td>-o, --output PATH</td><td>Write to this CSV. Omit for stdout.</td></tr>
+    <tr><td>--subset COLS</td><td>Comma-separated columns to match on (default: all columns).</td></tr>
+    <tr><td>--keep first|last</td><td>Which duplicate to keep (default <code>first</code>).</td></tr>
+  </table></div>
+</section>
+
+<section id="clean">
+  <h2>csvtidy clean</h2>
+  <p>Apply cleanup primitives: trim whitespace, collapse internal runs, drop blank rows,
+  rewrite mixed date formats to one format.</p>
+  <div class="term">
+    <div class="ln cmd">csvtidy clean feb.csv <span class="f">--fix-dates</span> signup_date <span class="f">--collapse-spaces</span> <span class="f">--output</span> feb.clean.csv</div>
+  </div>
+  <div class="scroll-x"><table>
+    <tr><th>option</th><th>what it does</th></tr>
+    <tr><td>--trim / --no-trim</td><td>Trim leading/trailing whitespace (default on).</td></tr>
+    <tr><td>--drop-empty-rows</td><td>Drop rows where every cell is blank (default on).</td></tr>
+    <tr><td>--collapse-spaces</td><td>Collapse internal whitespace runs to a single space.</td></tr>
+    <tr><td>--fix-dates COLS</td><td>Columns to normalize to one date format.</td></tr>
+    <tr><td>--date-format FMT</td><td>Output format for <code>--fix-dates</code> (default <code>%Y-%m-%d</code>).</td></tr>
+    <tr><td>--dayfirst</td><td>Read ambiguous dates day-first (<code>03/04</code> = 3 April).</td></tr>
+  </table></div>
+</section>
+
+<section id="run">
+  <h2>csvtidy run <span class="f">recipe.yaml</span></h2>
+  <p>A recipe captures a whole cleanup as a small YAML file — build it once, replay it on any
+  new batch. Steps compose into a single DuckDB query, keeping the larger-than-RAM streaming.</p>
+  <div class="term">
+    <div class="ln out">input: exports/*.csv</div>
+    <div class="ln out">output: customers.clean.csv</div>
+    <div class="ln out">source_column: source_file</div>
+    <div class="ln out">steps:</div>
+    <div class="ln out">&nbsp;&nbsp;- clean: { trim: true, fix_dates: [signup_date] }</div>
+    <div class="ln out">&nbsp;&nbsp;- dedupe: { subset: [email], keep: first }</div>
+  </div>
+  <div class="term">
+    <div class="ln cmd">csvtidy run recipe.yaml</div>
+  </div>
+  <p>Commands also pipe like any Unix tool — omit <code>--output</code> and CSV goes to stdout,
+  progress to stderr:</p>
+  <div class="term">
+    <div class="ln cmd">csvtidy merge <span class="pth">./exports</span> | csvtidy dedupe - <span class="f">--subset</span> email &gt; clean.csv</div>
+  </div>
+</section>
+
+<section id="how">
+  <h2>how it works</h2>
+  <p>csvtidy is a thin, friendly layer over <a href="https://duckdb.org">DuckDB</a>. Each command
+  builds one SQL query and lets DuckDB do the heavy lifting: it reads CSVs directly, processes
+  them streaming, and spills to disk when the job is bigger than memory. Merging a folder of
+  multi-gigabyte exports works on an ordinary laptop.</p>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="links">
+    <a href="https://github.com/abhishekrai43/csvtidy">GitHub</a>
+    <a href="https://pypi.org/project/csvtidy/">PyPI</a>
+    <a href="https://github.com/abhishekrai43/csvtidy/issues">Issues</a>
+    <a href="merge-csv-files-command-line.html">CLI merge guide</a>
+  </div>
+  <p>MIT © Abhishek Rai. csvtidy is the open-source CLI — if you'd rather have a desktop app
+  with a visual recipe builder on the same offline, big-file idea, see
+  <a href="https://kramata.com/">Kramata</a>.</p>
+</div></footer>
+</body>
+</html>
