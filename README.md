@@ -1,7 +1,7 @@
 # csvtidy
 
 Clean and merge messy CSV files from the command line — trim whitespace, fix dates, drop duplicates, and combine an entire folder of exports into one tidy file.
-For data engineers, analysts, and anyone wrangling CSV/Excel exports that are too big to open in a spreadsheet or too many to merge by hand.
+For data engineers, analysts, and anyone wrangling CSV exports — including the messy ones Excel and other tools spit out — that are too big to open in a spreadsheet or too many to merge by hand.
 **100% offline**, powered by **DuckDB** so it streams files **bigger than RAM**, and driven by reusable **recipes** — define your cleanup once, replay it on any file or whole folder.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
